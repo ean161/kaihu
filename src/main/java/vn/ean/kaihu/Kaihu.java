@@ -21,29 +21,34 @@ public class Kaihu implements Listener {
     public void onChat(AsyncChatEvent event) {
         String message = PlainTextComponentSerializer.plainText().serialize(event.message());
         Player player = event.getPlayer();
-        
-        String encodedMsg = String.format("player=%s&isOp=%s&msg=%s", player.getName(), player.isOp() ? "true" : "false", message);
+
         try {
-            encodedMsg = URLEncoder.encode(message, StandardCharsets.UTF_8.name());
-        } catch (Exception ex) { }
+            String encodedPlayer = URLEncoder.encode(player.getName(), StandardCharsets.UTF_8.name());
+            String encodedIsOp = URLEncoder.encode(String.valueOf(player.isOp()), StandardCharsets.UTF_8.name());
+            String encodedMsg = URLEncoder.encode(message, StandardCharsets.UTF_8.name());
 
-        Request request = new Request.Builder()
-            .url("https://ean.vn/models/project/kaihu/ask.php?" + encodedMsg)
-            .get()
-            .build();
+            String query = String.format("player=%s&isOp=%s&msg=%s", encodedPlayer, encodedIsOp, encodedMsg);
 
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) { }
+            Request request = new Request.Builder()
+                .url("https://ean.vn/models/project/kaihu/unauth_ask.php?" + query)
+                .get()
+                .build();
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String body = response.body().string();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) { }
 
-                Bukkit.getScheduler().runTask(App.getInstance(), () -> {
-                    player.sendMessage(body.length() > 200 ? body.substring(0, 200) + "..." : body);
-                });
-            }
-        });
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String body = response.body().string();
+
+                    Bukkit.getScheduler().runTask(App.getInstance(), () -> {
+                        player.sendMessage(body);
+                    });
+                }
+            });
+        } catch (Exception e) {
+            player.sendMessage("Đã xảy ra lỗi khi gửi tin nhắn.");
+        }
     }
 }
