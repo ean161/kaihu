@@ -1,0 +1,4 @@
+name: kaihu
+version: 1.0
+main: vn.ean.kaihu.App
+api-version: 1.20
