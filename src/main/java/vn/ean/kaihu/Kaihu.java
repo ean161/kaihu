@@ -24,7 +24,7 @@ public class Kaihu implements Listener {
     public void onChat(AsyncChatEvent event) {
         String message = PlainTextComponentSerializer.plainText().serialize(event.message());
 
-        if (!message.startsWith("@kaihu") && !message.contains("kaihu"))
+        if (!message.toLowerCase().contains("kaihu"))
             return;
 
         Player player = event.getPlayer();
